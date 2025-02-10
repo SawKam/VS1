@@ -3,6 +3,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        const viewer = document.querySelector("a-scene[mindar-image]");
+        const gltfModel = document.querySelector("a-gltf-model");
+
+        await viewer.systems["mindar-image"].start(); // Start the MindAR system
+
+        const smoothingFactor = 0.1; // Adjust for smoother or snappier stabilization
+
+        viewer.addEventListener("targetFound", () => {
+          console.log("Target Found!");
+        });
+
+        viewer.addEventListener("update", () => {
+          const targetEntity = gltfModel.object3D; // Get the 3D object of the glTF model
+
+          // Apply smoothing to position and rotation
+          const currentPosition = targetEntity.position.clone();
+          const targetPosition = viewer.components["mindar-image"].anchorGroups[0].group.position.clone();
+          targetEntity.position.lerp(targetPosition, smoothingFactor);
+
+          const currentRotation = targetEntity.quaternion.clone();
+          const targetRotation = viewer.components["mindar-image"].anchorGroups[0].group.quaternion.clone();
+          currentRotation.slerp(targetRotation, smoothingFactor);
+
+          targetEntity.position.copy(currentPosition);
+          targetEntity.quaternion.copy(currentRotation);
+        });
+      });
+    </script>
   </head>
   <body>
     <a-scene mindar-image="imageTargetSrc: ./Target/targets2.mind;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
@@ -11,10 +41,10 @@
         <a-asset-item id="avatarModel" src="./Assets/chair_358/chair_358.gltf"></a-asset-item>
       </a-assets>
 
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+      <a-camera position="0 0 0" look-controls="enabled: true"></a-camera>
       <a-entity mindar-image-target="targetIndex: 0">
         <a-plane src="#card" position="0 0 0" height=".35" width="1" rotation="0 0 0"></a-plane>
-        <a-gltf-model rotation="90 360 360 " position="0 0 1" scale="3 3 3" src="#avatarModel">
+        <a-gltf-model rotation="90 360 360" position="0.1 0.1 1" scale="3 3 3" src="#avatarModel"></a-gltf-model>
       </a-entity>
     </a-scene>
   </body>
