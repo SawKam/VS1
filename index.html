@@ -13,7 +13,7 @@
           await scene.systems["mindar-image"].start();
           console.log("MindAR started successfully");
 
-          const smoothingFactor = 0.2; // Adjust for smoother stabilization (0.1 - 0.3 works best)
+          const smoothingFactor = 0.1; // Adjust for smoother stabilization (0.1 - 0.3 works best)
           const modelObject3D = gltfModel.object3D;
 
           scene.addEventListener("targetUpdated", (event) => {
@@ -47,7 +47,7 @@
         <a-asset-item id="avatarModel" src="./Assets/Chair 1.draco.gltf"></a-asset-item>
       </a-assets>
 
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+      <a-camera position="0 0 0" look-controls="enabled: true"></a-camera>
       <a-entity mindar-image-target="targetIndex: 0">
         <a-plane src="#card" position="0 0 0" height=".35" width="1" rotation="0 0 0"></a-plane>
         <a-gltf-model rotation="90 360 360" position="0.1 0.1 0.1" scale="2 2 2" src="#avatarModel" 
