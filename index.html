@@ -5,32 +5,49 @@
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", async () => {
-        const viewer = document.querySelector("a-scene[mindar-image]");
+        const scene = document.querySelector("a-scene[mindar-image]");
         const gltfModel = document.querySelector("a-gltf-model");
 
-        await viewer.systems["mindar-image"].start(); // Start the MindAR system
+        try {
+          // Start the MindAR system
+          await scene.systems["mindar-image"].start();
+          console.log("MindAR started successfully");
 
-        const smoothingFactor = 0.1; // Adjust for smoother or snappier stabilization
+          const smoothingFactor = 0.1; // Adjust for smoother stabilization (lower = more stable)
 
-        viewer.addEventListener("targetFound", () => {
-          console.log("Target Found!");
-        });
+          // Add stabilization logic
+          scene.addEventListener("targetFound", () => {
+            console.log("Target found");
+          });
 
-        viewer.addEventListener("update", () => {
-          const targetEntity = gltfModel.object3D; // Get the 3D object of the glTF model
+          scene.addEventListener("targetUpdated", (event) => {
+            const targetIndex = event.detail.targetIndex;
 
-          // Apply smoothing to position and rotation
-          const currentPosition = targetEntity.position.clone();
-          const targetPosition = viewer.components["mindar-image"].anchorGroups[0].group.position.clone();
-          targetEntity.position.lerp(targetPosition, smoothingFactor);
+            if (targetIndex === 0) { // Assuming targetIndex: 0 for your model
+              const targetEntity = gltfModel.object3D;
 
-          const currentRotation = targetEntity.quaternion.clone();
-          const targetRotation = viewer.components["mindar-image"].anchorGroups[0].group.quaternion.clone();
-          currentRotation.slerp(targetRotation, smoothingFactor);
+              // Apply smoothing to position
+              const currentPosition = targetEntity.position.clone();
+              const targetPosition = event.detail.position.clone(); // Get the updated position
+              targetEntity.position.lerp(targetPosition, smoothingFactor);
 
-          targetEntity.position.copy(currentPosition);
-          targetEntity.quaternion.copy(currentRotation);
-        });
+              // Apply smoothing to rotation
+              const currentRotation = targetEntity.quaternion.clone();
+              const targetRotation = event.detail.rotation.clone(); // Get the updated rotation
+              currentRotation.slerp(targetRotation, smoothingFactor);
+
+              targetEntity.position.copy(currentPosition);
+              targetEntity.quaternion.copy(currentRotation);
+            }
+          });
+
+          scene.addEventListener("targetLost", () => {
+            console.log("Target lost");
+          });
+        } catch (error) {
+          console.error("Error initializing MindAR:", error);
+          alert("Failed to start AR experience. Please check the console for details.");
+        }
       });
     </script>
   </head>
