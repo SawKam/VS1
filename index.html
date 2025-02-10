@@ -3,6 +3,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        const scene = document.querySelector("a-scene[mindar-image]");
+        const gltfModel = document.querySelector("a-gltf-model");
+
+        try {
+          // Start the MindAR system
+          await scene.systems["mindar-image"].start();
+          console.log("MindAR started successfully");
+
+          const smoothingFactor = 0.2; // Adjust for smoother stabilization (0.1 - 0.3 works best)
+          const modelObject3D = gltfModel.object3D;
+
+          scene.addEventListener("targetUpdated", (event) => {
+            const targetIndex = event.detail.targetIndex;
+
+            if (targetIndex === 0) { // Ensure we're stabilizing the correct target
+              // Smooth Position
+              const currentPosition = modelObject3D.position.clone();
+              const targetPosition = event.detail.position.clone(); // Target position from the event
+              currentPosition.lerp(targetPosition, smoothingFactor); // Smooth transition
+              modelObject3D.position.copy(currentPosition);
+
+              // Smooth Rotation
+              const currentRotation = modelObject3D.quaternion.clone();
+              const targetRotation = event.detail.rotation.clone(); // Target rotation from the event
+              currentRotation.slerp(targetRotation, smoothingFactor); // Smooth transition
+              modelObject3D.quaternion.copy(currentRotation);
+            }
+          });
+        } catch (error) {
+          console.error("Error initializing MindAR:", error);
+          alert("Failed to start AR experience. Check console for details.");
+        }
+      });
+    </script>
   </head>
   <body>
     <a-scene mindar-image="imageTargetSrc: ./Target/targets2.mind;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
@@ -14,7 +50,9 @@
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
       <a-entity mindar-image-target="targetIndex: 0">
         <a-plane src="#card" position="0 0 0" height=".35" width="1" rotation="0 0 0"></a-plane>
-        <a-gltf-model rotation="90 360 360 " position="0.1 0.1 0.1" scale="2 2 2" src="#avatarModel" animation="property: position; to: 0 0 0; dur: 0; easing: false; loop: false; dir: alternate">
+        <a-gltf-model rotation="90 360 360" position="0.1 0.1 0.1" scale="2 2 2" src="#avatarModel" 
+          animation="property: position; to: 0 0 0; dur: 0; easing: false; loop: false; dir: alternate">
+        </a-gltf-model>
       </a-entity>
     </a-scene>
   </body>
