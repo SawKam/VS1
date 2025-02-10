@@ -3,53 +3,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", async () => {
-        const scene = document.querySelector("a-scene[mindar-image]");
-        const gltfModel = document.querySelector("a-gltf-model");
-
-        try {
-          // Start the MindAR system
-          await scene.systems["mindar-image"].start();
-          console.log("MindAR started successfully");
-
-          const smoothingFactor = 0.1; // Adjust for smoother stabilization (lower = more stable)
-
-          // Add stabilization logic
-          scene.addEventListener("targetFound", () => {
-            console.log("Target found");
-          });
-
-          scene.addEventListener("targetUpdated", (event) => {
-            const targetIndex = event.detail.targetIndex;
-
-            if (targetIndex === 0) { // Assuming targetIndex: 0 for your model
-              const targetEntity = gltfModel.object3D;
-
-              // Apply smoothing to position
-              const currentPosition = targetEntity.position.clone();
-              const targetPosition = event.detail.position.clone(); // Get the updated position
-              targetEntity.position.lerp(targetPosition, smoothingFactor);
-
-              // Apply smoothing to rotation
-              const currentRotation = targetEntity.quaternion.clone();
-              const targetRotation = event.detail.rotation.clone(); // Get the updated rotation
-              currentRotation.slerp(targetRotation, smoothingFactor);
-
-              targetEntity.position.copy(currentPosition);
-              targetEntity.quaternion.copy(currentRotation);
-            }
-          });
-
-          scene.addEventListener("targetLost", () => {
-            console.log("Target lost");
-          });
-        } catch (error) {
-          console.error("Error initializing MindAR:", error);
-          alert("Failed to start AR experience. Please check the console for details.");
-        }
-      });
-    </script>
   </head>
   <body>
     <a-scene mindar-image="imageTargetSrc: ./Target/targets2.mind;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
@@ -61,7 +14,7 @@
       <a-camera position="0 0 0" look-controls="enabled: true"></a-camera>
       <a-entity mindar-image-target="targetIndex: 0">
         <a-plane src="#card" position="0 0 0" height=".35" width="1" rotation="0 0 0"></a-plane>
-        <a-gltf-model rotation="90 360 360" position="0.1 0.1 1" scale="3 3 3" src="#avatarModel"></a-gltf-model>
+        <a-gltf-model rotation="90 360 360" position="0 0.5 1" scale="2 2 2" src="#avatarModel"></a-gltf-model>
       </a-entity>
     </a-scene>
   </body>
